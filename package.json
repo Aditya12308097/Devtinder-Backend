@@ -1,0 +1,22 @@
+{
+  "name": "devtinder---backend",
+  "version": "1.0.0",
+  "description": "This is my project backend",
+  "main": "index.js",
+  "scripts": {
+    "start" : "node src/app.js",
+    "dev":"nodemon src/app.js"
+  },
+  "keywords": [
+    "backend",
+    "DevTinder",
+    "node",
+    "js",
+    "express.js"
+  ],
+  "author": "Aditya",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}
