@@ -1,45 +1,33 @@
 const express = require("express");
 const app = express();
 
-// app.use("/admin",(req,res,next)=>{//this is a middleware which will be run for all /admin routes
-//     const token = "xy1z";
-//     const isAuthorized = token === "xyz";
-//     if(!isAuthorized){
-//         res.status(401).send("Unauthorized Access!!!");
-//     }else{
-//         next();
-//     }
+//error handling , so handle errors always write the code in try catch block
 
-// });
-//now the above middleware will run for all type of requests startig with /admin route , we could write above code in each and every single api but
-// how bad our code would be , and how much data duplicacy would be there, that is why middleware exists
-
-// app.get("/admin/getData",(req,res)=>{
-//     res.send("This is the Data!!!");
-// });
-// app.delete("/admin/deleteData",(req,res)=>{
-//     res.send("Deleted a User!!!!!!!!");
-// });
-
-//Another way to do it , just make a separate folder and whenever we need middleware , first export that and import here
-const {adminAuth,userAuth} = require("./middlewares/auth.js");
-
-app.use("/admin",adminAuth);
-app.get("/admin/getData",(req,res)=>{
-    res.send("This is the Data!!!");
-});
-app.delete("/admin/deleteData",(req,res)=>{
-    res.send("Deleted a User!!!!!!!!");
+app.get("/userData",(req,res)=>{
+    try{
+        const a =20;
+        const b = 0;
+        if(b == 0){
+            throw new Error("0 can not be dividend!!!!!!!!!");
+            
+        }
+        res.send(`Division of ${a} with ${b} would be ${a/b}`);
+    }catch(err){
+        console.log(err);
+        res.status(500).send("Something went wrong");
+    }finally{
+        console.log("This is finally block!!!");//this will always run whether you get an error or not!
+    }
 });
 
-app.post("/user/login/:name",(req,res)=>{
-    const name = req.params.name;
-    res.send("User is Logged In!!!!!"+name);
+//what if you do not use try catch block, simple write wildcard error handler , it will handle all errors if they come, it will
+//handle only in case if you are not using try catch block 
+app.use("/",(err,req,res,next)=>{
+    if(err){
+        console.log(err);
+        res.status(500).send("Something went wrong!!!!");
+    }
 })
-app.get("/userData",userAuth,(req,res)=>{ // here , it is same way to write different functions before actual route handler
-    res.send("This is user Data!!!!!");
-});
-
 
 
 
