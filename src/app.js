@@ -1,36 +1,32 @@
 const express = require("express");
+const {connectDB} = require("./config/database");
 const app = express();
+const {User} = require("./models/userSchema");
 
-//error handling , so handle errors always write the code in try catch block
-
-app.get("/userData",(req,res)=>{
+//let's create a signup api , which is saving some kind of data into the database
+app.post("/signup",async (req,res)=>{
     try{
-        const a =20;
-        const b = 0;
-        if(b == 0){
-            throw new Error("0 can not be dividend!!!!!!!!!");
-            
-        }
-        res.send(`Division of ${a} with ${b} would be ${a/b}`);
+        const data={
+            firstName : "Ajay",
+            lastName : "Chaudhary",
+            emailID : "ajy@gmail.com",
+            password : "ajay@123"
+        };
+        const user = new User(data);
+        await user.save(); //this is a db operation which returns promise , how to handle them using async and await
+        res.status(200).send("Data saved successfully!!!!");
     }catch(err){
-        console.log(err);
-        res.status(500).send("Something went wrong");
-    }finally{
-        console.log("This is finally block!!!");//this will always run whether you get an error or not!
+        res.status(400).send("Something went wrong!!!! "+err.message);
     }
 });
 
-//what if you do not use try catch block, simple write wildcard error handler , it will handle all errors if they come, it will
-//handle only in case if you are not using try catch block 
-app.use("/",(err,req,res,next)=>{
-    if(err){
-        console.log(err);
-        res.status(500).send("Something went wrong!!!!");
-    }
+connectDB().then(()=>{
+    console.log("Connected to Database Successfully!!!!!!");
+    app.listen(3000,()=>{
+    console.log("Server is listening on port 3000!!!");
+    });
+})
+.catch((err)=>{
+    console.error("Some Error Ocurred!!!! " + err);
 })
 
-
-
-app.listen(3000,()=>{
-    console.log("Server is listening on port 3000");
-});
