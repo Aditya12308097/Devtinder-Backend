@@ -3,20 +3,21 @@ const {connectDB} = require("./config/database");
 const app = express();
 const {User} = require("./models/userSchema");
 
+app.use(express.json()); //it will convert the json data into js objects so that our server is able to read what is being sent
+
+
 //let's create a signup api , which is saving some kind of data into the database
 app.post("/signup",async (req,res)=>{
+
+    //now we want this api dynamic: means data should be sent by external frontend app
+    const data = req.body;
+    
     try{
-        const data={
-            firstName : "Ajay",
-            lastName : "Chaudhary",
-            emailID : "ajy@gmail.com",
-            password : "ajay@123"
-        };
         const user = new User(data);
-        await user.save(); //this is a db operation which returns promise , how to handle them using async and await
-        res.status(200).send("Data saved successfully!!!!");
+        await user.save();
+        res.status(200).send("Data Saved Successfully!!!!");
     }catch(err){
-        res.status(400).send("Something went wrong!!!! "+err.message);
+        res.status(400).send("Something went wrong!!!!!!!  "+err.message);
     }
 });
 
