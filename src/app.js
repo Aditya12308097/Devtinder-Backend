@@ -33,7 +33,38 @@ app.get("/feed",async (req,res)=>{
     }catch(err){
         res.status(400).send(err);
     }
-})
+});
+app.delete("/deleteUser",async (req,res)=>{
+    //first of all we should have a parameter on which we have to delete like id , firstname , email id or something else
+        const userEmail = req.body.emailID;
+    try{
+        //there are many methods to delete like findByIdandDelete() or findOneandDelete();
+        const deletedUser = await User.findOneAndDelete({emailID : userEmail}); //it will delete the user and return you the deleted document
+        // if you have id of document , you can delete a user by its id also
+        // await User.findByIdAndDelete(userId);//can pass like this
+        // or 
+        // await User.findByIdAndDelete({_id : userID}) // this way , you can delete a user both will work
+
+        res.send(`${deletedUser.firstName} has been deleted from the Database!!!!!`);
+    }catch(err){
+        res.status(400).send("Something went wrong!!!!!");
+    }
+});
+
+//update API
+app.patch("/updateUser",async (req,res)=>{
+    // const userId = req.body.id;
+    //we can destructring the object
+    const {id,...data} = req.body;//here we are using rest operator
+    try{
+        // const update = await User.findByIdAndUpdate(userId,req.body,{returnDocument : "after"});
+        //you can update the document using findOneand Update method
+        const update = await User.findOneAndUpdate({_id:id},data,{returnDocument : "after"}); //in above method , you write the query like you have written here
+        res.status(200).send("Document update successfully"+update);
+    }catch(err){
+        res.status(400).send("Something went wrong!!!!!!");
+    }
+});
 app.get("/findUser",async (req,res)=>{
     //now i want to find one user 
     // const userEmail = req.body.emailID;
@@ -68,7 +99,7 @@ app.get("/findUser",async (req,res)=>{
     }catch(err){
         res.status(400).send(err);
     }
-})
+});
 
 connectDB().then(()=>{
     console.log("Connected to Database Successfully!!!!!!");
