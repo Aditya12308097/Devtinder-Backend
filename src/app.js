@@ -12,6 +12,7 @@ app.post("/signup",async (req,res)=>{
     //now we want this api dynamic: means data should be sent by external frontend app
     const data = req.body;
     
+    
     try{
         const user = new User(data);
         await user.save();
@@ -57,12 +58,26 @@ app.patch("/updateUser",async (req,res)=>{
     //we can destructring the object
     const {id,...data} = req.body;//here we are using rest operator
     try{
+        //see we can not just change what a user sends , as we cannot trust the user , so that is why we some api level checks before adding 
+        //data to the database
+
+        const allowed_updates = ["firstName","lastName","photoURL","skills","gender","age"];
+
+        const isAllowed = Object.keys(data).every((k)=>allowed_updates.includes(k));///if anytime false comes then , you cannot just update your profile
+        if(!isAllowed){
+            throw new Error("Updates are not allowed!!!!!");
+        }
+
+
         // const update = await User.findByIdAndUpdate(userId,req.body,{returnDocument : "after"});
         //you can update the document using findOneand Update method
-        const update = await User.findOneAndUpdate({_id:id},data,{returnDocument : "after"}); //in above method , you write the query like you have written here
-        res.status(200).send("Document update successfully"+update);
+        const update = await User.findOneAndUpdate({_id:id},data,{
+            returnDocument : "after",
+            runValidators:true,//it will run all custom validators functions
+        }); //in above method , you write the query like you have written here
+        res.status(200).send(update.firstName + "!! Your document updated successfully");
     }catch(err){
-        res.status(400).send("Something went wrong!!!!!!");
+        res.status(400).send("UPDATION FAILED: "+err.message);
     }
 });
 app.get("/findUser",async (req,res)=>{
