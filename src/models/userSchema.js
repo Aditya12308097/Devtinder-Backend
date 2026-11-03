@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const validator = require("validator");// to some extra check , using a library
 //till now we were just putting anything in our database but we can't put everything in our database and we cann't trust the user , he can send anything
 //that is why we will put schema level validations
 const userSchema = new mongoose.Schema({
@@ -18,11 +19,21 @@ const userSchema = new mongoose.Schema({
         unique:true,//makes it a unique parameter means you can not register twice , duplicate emails are not allowed
         lowercase:true,
         required:true,
-        trim:true
+        trim:true,
+        validate(value){
+            if(!validator.isEmail(value)){
+                throw new Error("Please! enter a valid Email ID!!");
+            }
+        }
     },
     password :{
         type:String,
         required:true,
+        validate(value){
+            if(!validator.isStrongPassword(value)){
+                throw new Error("Please!! Enter a Strong password!!!!!!!")
+            }
+        }
 
     },
     age :{
@@ -50,6 +61,11 @@ const userSchema = new mongoose.Schema({
     photoURL :{
         type:String,
         default:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRY89DdxakHMYOYW6EfZVKzBa1ZZWn-Umm1icw_1MhSjA&s=10",
+        validate(value){
+            if(!validator.isURL(value)){
+                throw new Error("Please provide a valid url!!!!!");
+            }
+        }
     },
     about:{
         type:String,

@@ -61,7 +61,7 @@ app.patch("/updateUser",async (req,res)=>{
         //see we can not just change what a user sends , as we cannot trust the user , so that is why we some api level checks before adding 
         //data to the database
 
-        const allowed_updates = ["firstName","lastName","photoURL","skills","gender","age"];
+        const allowed_updates = ["firstName","lastName","photoURL","skills","gender","age","about"];
 
         const isAllowed = Object.keys(data).every((k)=>allowed_updates.includes(k));///if anytime false comes then , you cannot just update your profile
         if(!isAllowed){
