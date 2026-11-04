@@ -2,6 +2,9 @@ const express = require("express");
 const {connectDB} = require("./config/database");
 const app = express();
 const {User} = require("./models/userSchema");
+const {validateSignupData} = require("./utils/validateData");
+const bcrypt = require("bcrypt");
+const validator = require("validator");
 
 app.use(express.json()); //it will convert the json data into js objects so that our server is able to read what is being sent
 
@@ -10,17 +13,61 @@ app.use(express.json()); //it will convert the json data into js objects so that
 app.post("/signup",async (req,res)=>{
 
     //now we want this api dynamic: means data should be sent by external frontend app
-    const data = req.body;
+   
     
     
     try{
-        const user = new User(data);
+
+        const {firstName,lastName, emailID,password} = req.body;
+        //before saving data into the database , first validate the data , then encrypt the password then save the data into the database
+        validateSignupData(req); // it will validate the data , now you have to encyrpt the password!!!
+
+        //to encrypt the password
+        const passwordHash = await bcrypt.hash(password,10);
+
+        //now you have hash password , just save the data
+
+        const user = new User({
+            firstName,
+            lastName,
+            emailID,
+            password : passwordHash
+        });
         await user.save();
         res.status(200).send("Data Saved Successfully!!!!");
     }catch(err){
         res.status(400).send("Something went wrong!!!!!!!  "+err.message);
     }
 });
+
+app.post("/login",async (req,res)=>{
+    try{
+        const {email,password} = req.body;
+        if(validator.isEmail(emailID)){
+            throw new Error("Please enter a valid Email ID!!!!!");
+        }
+        //check whether account exists
+        const user = await User.findOne({emailID : email});
+        if(!user){
+            throw new Error("Invalid Email or Password!!!!!!!!");
+        }
+
+        const isValidPassword = await bcrypt.compare(password,user.password);//both are equal then you can say you are logged in
+
+        if(!isValidPassword){
+            throw new Error("Invalid Email or Password!!!!");
+        }
+
+        res.status(200).send("Logged In Successfully!!!!!!!");
+
+
+    }catch(err){
+        res.status(400).send("Login Failed: "+err.message);
+    }
+})
+
+
+
 
 app.get("/feed",async (req,res)=>{
     //now i want all user in one go
