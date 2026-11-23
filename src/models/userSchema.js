@@ -1,5 +1,7 @@
 const mongoose = require("mongoose");
+const bcrypt = require("bcrypt");
 const validator = require("validator");// to some extra check , using a library
+const jwt = require("jsonwebtoken");
 //till now we were just putting anything in our database but we can't put everything in our database and we cann't trust the user , he can send anything
 //that is why we will put schema level validations
 const userSchema = new mongoose.Schema({
@@ -75,6 +77,19 @@ const userSchema = new mongoose.Schema({
 },{
     timestamps:true,// this will add when you inserted new document and when you last updated the document
 });
+
+
+userSchema.methods.validatePassword = async function (passwordInputByUser){
+    const isValidPassword = await bcrypt.compare(passwordInputByUser,this.password);
+    return isValidPassword;
+}
+
+userSchema.methods.getJWT = async function (){
+    const token = await jwt.sign({id:this._id},"DEV@Tinder$1234",{
+        expiresIn : '1h'
+    });
+    return token;
+}
 
 //Schema is like a blueprint of a class , it not a actual class, now model is like a class and whenever we save or fetch , we require this class
 const User = mongoose.model("User",userSchema);

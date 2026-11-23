@@ -55,16 +55,14 @@ app.post("/login",async (req,res)=>{
             throw new Error("Register Yourself to proceed further!!!!!!");
         }
 
-        const isValidPassword = await bcrypt.compare(password,user.password);//both are equal then you can say you are logged in
+        const isValidPassword = await user.validatePassword(password);
 
         if(!isValidPassword){
             throw new Error("Invalid Email or Password!!!!");
         }
 
         //we want to introduce cookies here , so that we don't need to verify that you are the valid user or not again and again
-        const token = await jwt.sign({id : user._id},"DEV@Tinder$1234",{
-            expiresIn : '1h'
-        });
+        const token = await user.getJWT();
         res.cookie("token",token,{
             expires : new Date(Date.now() + 36000),
             httpOnly : true //it will work on http protocol only
