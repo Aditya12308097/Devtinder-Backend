@@ -5,9 +5,11 @@ const {User} = require("./models/userSchema");
 const {validateSignupData} = require("./utils/validateData");
 const bcrypt = require("bcrypt");
 const validator = require("validator");
+const cookieparser = require("cookie-parser");
+const jwt = require("jsonwebtoken");
 
 app.use(express.json()); //it will convert the json data into js objects so that our server is able to read what is being sent
-
+app.use(cookieparser());
 
 //let's create a signup api , which is saving some kind of data into the database
 app.post("/signup",async (req,res)=>{
@@ -43,13 +45,13 @@ app.post("/signup",async (req,res)=>{
 app.post("/login",async (req,res)=>{
     try{
         const {email,password} = req.body;
-        if(validator.isEmail(emailID)){
+        if(!validator.isEmail(email)){
             throw new Error("Please enter a valid Email ID!!!!!");
         }
         //check whether account exists
         const user = await User.findOne({emailID : email});
         if(!user){
-            throw new Error("Invalid Email or Password!!!!!!!!");
+            throw new Error("Register Yourself to proceed further!!!!!!");
         }
 
         const isValidPassword = await bcrypt.compare(password,user.password);//both are equal then you can say you are logged in
@@ -58,11 +60,31 @@ app.post("/login",async (req,res)=>{
             throw new Error("Invalid Email or Password!!!!");
         }
 
+        //we want to introduce cookies here , so that we don't need to verify that you are the valid user or not again and again
+        const token = await jwt.sign({id : user._id},"DEV@Tinder$1234");
+        res.cookie("token",token);
         res.status(200).send("Logged In Successfully!!!!!!!");
 
 
     }catch(err){
         res.status(400).send("Login Failed: "+err.message);
+    }
+});
+
+app.get("/profile", async (req,res)=>{
+    try{
+        const cookies = req.cookies;
+        const {token} = cookies;
+        if(!token){
+            throw new Error("Login Again !!!!!!");
+        }
+        const decodeMessage = await jwt.verify(token,"DEV@Tinder$1234");// it has 2 things your hidden information and one more thing 
+        
+        const {id} = decodeMessage;
+        const profile = await User.findById(id);
+        res.status(200).send(profile);
+    }catch(err){
+        res.status(400).send("Error: "+err.message);
     }
 })
 
